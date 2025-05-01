@@ -17,12 +17,7 @@ void reader(ifstream &f){
 	cout << n << n << "Всего символов(включая невидимые) : " << size << n ;
 	f.close();
 }
-void adder(string s,ofstream &f){
-	int i = 0;
-	while(s[i]) f.put(s[i++]);
-	f.close();
-}
-void rewriter(string s,ofstream &f){
+void writer(string s,ofstream &f){
 	int i = 0;
 	while(s[i]) f.put(s[i++]);
 	f.close();
@@ -55,13 +50,13 @@ int main(int argc,char *argv[]){
 		ofstream file(argv[1],ios::out | ios::app | ios::binary);
 		string str;
 		getline(cin,str);
-		adder(str,file);
+		writer(str,file);
 	}
 	if(atoi(argv[2]) == 3){
 		ofstream file(argv[1],ios::out | ios::trunc);
 		string s;
 		getline(cin,s);
-		rewriter(s,file);
+		writer(s,file);
 	}
 	if(atoi(argv[2]) == 4){
 		ifstream what(argv[1],ios::in | ios::binary);
