@@ -11,6 +11,16 @@ void reader(ifstream &f){
 	int size = 0;
 	cout << n;
 	while(f.get(ch)){
+		if(ch == '\\' && f.peek() == 'n'){
+			cout << "\n";
+			f.get(ch);
+			continue;
+		}
+		if(ch == '\\' && f.peek() == 't'){
+			cout << '\t';
+			f.get(ch);
+			continue;
+		}
 		cout << ch;
 		size++;
 	}
@@ -29,7 +39,7 @@ void copier(ofstream &to,ifstream &from){
 	to.close();
 }
 void menu(){
-	cout << n << "Использование : \n \n./programm file.name чтение(1)/добавление(2)/перезапись(3)/копирование(4)" 
+	cout << n << "Использование : \n \n./programm file.name чтение(1)/добавление(2)/перезапись(3)/\n  копирование(4)/изменение байта(5)" 
 	<< n << n;
 }
 int main(int argc,char *argv[]){
@@ -60,6 +70,11 @@ int main(int argc,char *argv[]){
 	}
 	if(atoi(argv[2]) == 4){
 		ifstream what(argv[1],ios::in | ios::binary);
+		if(!what)
+		{
+			cout << "Не удалось открыть файл " << "\'" << argv[1] << "\'" << n;
+			return 1;
+		}
 		string s;
 		cin >> s;
 		ofstream where(s,ios::out | ios::trunc);
