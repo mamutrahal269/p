@@ -70,4 +70,8 @@ int main(int argc,char *argv[]){
 		ofstream where(s,ios::out | ios::trunc);
 		copier(where,what);
 	}
+	else{
+		menu();
+		return 1;
+	}
 }
