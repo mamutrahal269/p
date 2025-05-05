@@ -49,25 +49,16 @@ void paste(int byte,string str,string file){
 	string temp_end;
 	char ch;
 	
-	for(int i = 0;i<byte && r;i++){
-		r.get(ch);
-		temp_beg += ch;
-	}
+	for(int i = 0;i<byte && r.get(ch);i++) temp_beg += ch;
 	
-	for(;r;){
-		r.get(ch);
-		temp_end += ch;
-	}
+	while(r.get(ch)) temp_end += ch;
 	r.close();
 	temp_beg += str + temp_end;
 	w.open(file,ios::out | ios::trunc | ios::binary);
-	int i = 0;
-	while(temp_beg[i]){
-		w.put(temp_beg[i]);
-		i++;
-	}
+	w<<temp_beg;
 	w.close();
 }
+void erase(int from,int to,ofstream &f){}
 void menu(){
 	cout << n << "Использование : \n \n./programm file.name чтение(1)/добавление(2)/перезапись(3)/\n  копирование(4)/произвольная вставка(5)" 
 	<< n << n;
