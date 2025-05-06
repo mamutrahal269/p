@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <string>
+#include <cstring>
 using namespace std;
 ostream &n(ostream &stream){
 	stream << "\n";
@@ -58,9 +59,21 @@ void paste(int byte,string str,string file){
 	w<<temp_beg;
 	w.close();
 }
-void erase(int from,int to,ofstream &f){}
+void erase(int from,int to,char* fname){
+	fstream f(fname,ios::in);
+	string temp;
+	char ch;
+	from--;
+	for(int i = 0;i<from && f.get(ch);i++) temp += ch;
+	f.seekg(to - from,ios::cur);
+	while(f.get(ch)) temp += ch;
+	f.close();
+	f.open(fname,ios::out | ios::trunc);
+	f << temp;
+}	
 void menu(){
-	cout << n << "Использование : \n \n./programm file.name чтение(1)/добавление(2)/перезапись(3)/\n  копирование(4)/произвольная вставка(5)" 
+	cout << n << "Использование : \n \n./programm file-name чтение(read)/добавление(add)/перезапись(rewrite)/";
+	cout << "\n  копирование(copy)/произвольная вставка(paste)/стереть(erase)"
 	<< n << n;
 }
 int main(int argc,char *argv[]){
@@ -68,7 +81,11 @@ int main(int argc,char *argv[]){
 		menu();
 		return 1;
 	}
-	if(atoi(argv[2]) == 1){
+	if(strcmp(argv[2],"read") && strcmp(argv[2],"add") && strcmp(argv[2],"rewrite") && strcmp(argv[2],"copy") && strcmp(argv[2],"paste") && strcmp(argv[2],"erase")){
+		menu();
+		return 1;
+	}
+	if(!strcmp(argv[2],"read")){
 		ifstream file(argv[1],ios::in);
 		if(!file)
 		{
@@ -77,19 +94,19 @@ int main(int argc,char *argv[]){
 		}
 		read(file);
 	}
-	if(atoi(argv[2]) == 2){
+	if(!strcmp(argv[2],"add")){
 		ofstream file(argv[1],ios::out | ios::app | ios::binary);
 		string str;
 		getline(cin,str);
 		write(str,file);
 	}
-	if(atoi(argv[2]) == 3){
+	if(!strcmp(argv[2],"rewrite")){
 		ofstream file(argv[1],ios::out | ios::trunc);
 		string s;
 		getline(cin,s);
 		write(s,file);
 	}
-	if(atoi(argv[2]) == 4){
+	if(!strcmp(argv[2],"copy")){
 		ifstream what(argv[1],ios::in | ios::binary);
 		if(!what)
 		{
@@ -101,12 +118,18 @@ int main(int argc,char *argv[]){
 		ofstream where(s,ios::out | ios::trunc | ios::binary);
 		copy(where,what);
 	}
-	if(atoi(argv[2]) == 5){
+	if(!strcmp(argv[2],"paste")){
 		cout << n << "Введите байт и строку" << n;
 		string s;
 		int b;
 		cin >> b;
 		getline(cin,s);
 		paste(b,s,argv[1]);
+	}
+	if(!strcmp(argv[2],"erase")){
+		fstream file(argv[1],ios::in | ios::out);
+		int a,b;
+		cin >> a >> b;
+		erase(a,b,argv[1]);
 	}
 }
