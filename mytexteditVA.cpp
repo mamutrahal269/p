@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdlib>
 #include <fstream>
 #include <string>
 #include <cstring>
@@ -72,8 +71,8 @@ void erase(int from,int to,char* fname){
 	f << temp;
 }	
 void menu(){
-	cout << n << "Использование : \n \n./programm file-name чтение(read)/добавление(add)/перезапись(rewrite)/";
-	cout << "\n  копирование(copy)/произвольная вставка(paste)/стереть(erase)"
+	cout << n << "Использование : \n \n./programm file-name чтение(-rd)/добавление(-a)/перезапись(-rw)/";
+	cout << "\n  копирование(-cp)/произвольная вставка(-p)/стереть(-e)"
 	<< n << n;
 }
 int main(int argc,char *argv[]){
@@ -81,11 +80,11 @@ int main(int argc,char *argv[]){
 		menu();
 		return 1;
 	}
-	if(strcmp(argv[2],"read") && strcmp(argv[2],"add") && strcmp(argv[2],"rewrite") && strcmp(argv[2],"copy") && strcmp(argv[2],"paste") && strcmp(argv[2],"erase")){
+	if(strcmp(argv[2],"-rd") && strcmp(argv[2],"-a") && strcmp(argv[2],"-rw") && strcmp(argv[2],"-cp") && strcmp(argv[2],"-p") && strcmp(argv[2],"-e")){
 		menu();
 		return 1;
 	}
-	if(!strcmp(argv[2],"read")){
+	if(!strcmp(argv[2],"-rd")){
 		ifstream file(argv[1],ios::in);
 		if(!file)
 		{
@@ -94,19 +93,19 @@ int main(int argc,char *argv[]){
 		}
 		read(file);
 	}
-	if(!strcmp(argv[2],"add")){
+	if(!strcmp(argv[2],"-a")){
 		ofstream file(argv[1],ios::out | ios::app | ios::binary);
 		string str;
 		getline(cin,str);
 		write(str,file);
 	}
-	if(!strcmp(argv[2],"rewrite")){
+	if(!strcmp(argv[2],"-rw")){
 		ofstream file(argv[1],ios::out | ios::trunc);
 		string s;
 		getline(cin,s);
 		write(s,file);
 	}
-	if(!strcmp(argv[2],"copy")){
+	if(!strcmp(argv[2],"-cp")){
 		ifstream what(argv[1],ios::in | ios::binary);
 		if(!what)
 		{
@@ -118,7 +117,7 @@ int main(int argc,char *argv[]){
 		ofstream where(s,ios::out | ios::trunc | ios::binary);
 		copy(where,what);
 	}
-	if(!strcmp(argv[2],"paste")){
+	if(!strcmp(argv[2],"-p")){
 		cout << n << "Введите байт и строку" << n;
 		string s;
 		int b;
@@ -126,7 +125,7 @@ int main(int argc,char *argv[]){
 		getline(cin,s);
 		paste(b,s,argv[1]);
 	}
-	if(!strcmp(argv[2],"erase")){
+	if(!strcmp(argv[2],"-e")){
 		fstream file(argv[1],ios::in | ios::out);
 		int a,b;
 		cin >> a >> b;
