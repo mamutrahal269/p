@@ -2,12 +2,13 @@
 #include <fstream>
 #include <string>
 #include <cstring>
+#include <cstdlib>
 using namespace std;
 ostream &n(ostream &stream){
 	stream << "\n";
 	return stream;
 }
-void read(ifstream &f){
+void read(fstream &f){
 	char ch;
 	int size = 0;
 	cout << n;
@@ -27,19 +28,20 @@ void read(ifstream &f){
 		cout << ch;
 		size++;
 	}
-	cout << n << n << "Всего символов(включая невидимые) : " << size << n ;
+	cout << n << n << "Размер файла : " << size << " байт" << n ;
 	f.close();
 }
-void write(string s,ofstream &f){
+void write(char* s,fstream &f){
 	int i = 0;
 	while(s[i]) f.put(s[i++]);
 	f.close();
 }
-void copy(ofstream &to,ifstream &from){
+void copy(fstream &f,char* fname){
+	fstream file(fname,ios::out | ios::trunc);
 	char ch;
-	while(from.get(ch)) to.put(ch);
-	from.close();
-	to.close();
+	while(f.get(ch)) file.put(ch);
+	file.close();
+	f.close();
 }
 void paste(int byte,string str,string file){
 	ofstream w;
@@ -58,13 +60,12 @@ void paste(int byte,string str,string file){
 	w<<temp_beg;
 	w.close();
 }
-void erase(int from,int to,char* fname){
+void erase(int start,int end,char* fname){
 	fstream f(fname,ios::in);
 	string temp;
 	char ch;
-	from--;
-	for(int i = 0;i<from && f.get(ch);i++) temp += ch;
-	f.seekg(to - from,ios::cur);
+	for(int i = 0;i<start && f.get(ch);i++) temp += ch;
+	f.seekg(end - start,ios::cur);
 	while(f.get(ch)) temp += ch;
 	f.close();
 	f.open(fname,ios::out | ios::trunc);
@@ -76,7 +77,7 @@ void menu(){
 	<< n << n;
 }
 int main(int argc,char *argv[]){
-	if(argc < 3 || argc > 3){
+	if(argc<3){
 		menu();
 		return 1;
 	}
@@ -85,50 +86,75 @@ int main(int argc,char *argv[]){
 		return 1;
 	}
 	if(!strcmp(argv[2],"-rd")){
-		ifstream file(argv[1],ios::in);
-		if(!file)
-		{
-			cout << "Не удалось открыть файл " << "\'" << argv[1] << "\'" << n;
+		if(argc>3){
+			cout << "Использование функции чтение(-rd) : " << n
+			<< "./programm file-name -rd" << n;
+			return 1;
+		}
+		fstream file(argv[1],ios::in);
+		if(!file){
+			cout << "Не удалось открыть файл '" << argv[1] << "'" << n;
 			return 1;
 		}
 		read(file);
 	}
 	if(!strcmp(argv[2],"-a")){
-		ofstream file(argv[1],ios::out | ios::app | ios::binary);
-		string str;
-		getline(cin,str);
-		write(str,file);
-	}
-	if(!strcmp(argv[2],"-rw")){
-		ofstream file(argv[1],ios::out | ios::trunc);
-		string s;
-		getline(cin,s);
-		write(s,file);
-	}
-	if(!strcmp(argv[2],"-cp")){
-		ifstream what(argv[1],ios::in | ios::binary);
-		if(!what)
-		{
-			cout << "Не удалось открыть файл " << "\'" << argv[1] << "\'" << n;
+		if(argc<4){
+			cout << "Использование функции добавление(-a) : " << n
+			<< "./programm file-name -a ваша_строка" << n;
 			return 1;
 		}
-		string s;
-		cin >> s;
-		ofstream where(s,ios::out | ios::trunc | ios::binary);
-		copy(where,what);
+		fstream file(argv[1],ios::out | ios::app);
+		if(!file){
+			cout << "Не удалось открыть файл '" << argv[1] << "'" << n;
+			return 1;
+		}
+		write(argv[3],file);
+	}
+	if(!strcmp(argv[2],"-rw")){
+		if(argc<4){
+			cout << "Использование функции перезапись(-rw) : " << n
+			<< "./programm file-name -rw ваша_строка" << n;
+			return 1;
+		}
+		fstream file(argv[1],ios::out | ios::trunc);
+		if(!file){
+			cout << "Не удалось открыть файл '" << argv[1] << "'" << n;
+			return 1;
+		}
+		write(argv[3],file);
+	}
+	if(!strcmp(argv[2],"-cp")){
+		if(argc<4){
+			cout << "Использование функции копирование(-cp) : " << n
+			<< "./programm file-name -cp to-file-name" << n;
+			return 1;
+		}
+		fstream file(argv[1],ios::in);
+		if(!file){
+			cout << "Не удалось открыть файл '" << argv[1] << "'" << n;
+			return 1;
+		}
+		if(!strcmp(argv[1],argv[3])){
+			cout << "Неверный ввод" << n;
+			return 1;
+		}
+		copy(file,argv[3]);
 	}
 	if(!strcmp(argv[2],"-p")){
-		cout << n << "Введите байт и строку" << n;
-		string s;
-		int b;
-		cin >> b;
-		getline(cin,s);
-		paste(b,s,argv[1]);
+		if(argc<5){
+			cout << "Использование функции произвольная вставка(-p) : " << n
+			<< "./programm file-name -p байт ваша_строка" << n;
+			return 1;
+		}
+		paste(atoi(argv[3]),argv[4],argv[1]);
 	}
 	if(!strcmp(argv[2],"-e")){
-		fstream file(argv[1],ios::in | ios::out);
-		int a,b;
-		cin >> a >> b;
-		erase(a,b,argv[1]);
+		if(argc != 5){
+			cout << "Использование функции стереть(-e) : " << n
+			<< "./programm file-name -p байт-от байт-до" << n;
+			return 1;
+		}
+		erase(atoi(argv[3]),atoi(argv[4]),argv[1]);
 	}
 }
