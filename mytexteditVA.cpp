@@ -47,33 +47,43 @@ void paste(int byte,string str,string file){
 	ofstream w;
 	ifstream r;
 	r.open(file);
-	string temp_beg;
-	string temp_end;
-	char ch;
-	
-	for(int i = 0;i<byte && r.get(ch);i++) temp_beg += ch;
-	
-	while(r.get(ch)) temp_end += ch;
-	r.close();
-	temp_beg += str + temp_end;
-	w.open(file,ios::out | ios::trunc | ios::binary);
-	w<<temp_beg;
-	w.close();
-}
-void erase(int start,int end,char* fname){
-	fstream f(fname,ios::in);
 	string temp;
 	char ch;
-	for(int i = 0;i<start && f.get(ch);i++) temp += ch;
-	f.seekg(end - start,ios::cur);
+	while(r.get(ch)) temp += ch;
+	temp.insert(byte,str);
+	r.close();
+	w.open(file,ios::out | ios::trunc);
+	w<<temp;
+	w.close();
+}
+void erase(int start,int count,char* fname){
+	fstream f(fname,ios::in);
+	if(start>0) start--;
+	string temp;
+	char ch;
 	while(f.get(ch)) temp += ch;
+	temp.erase(start,count);
 	f.close();
 	f.open(fname,ios::out | ios::trunc);
 	f << temp;
-}	
+}
+void search(string str,fstream &file){
+	string temp;
+	char ch;
+	while(file.get(ch)) temp += ch;
+	int index = temp.find(str);
+	if(index == string::npos){
+		cout << n << "Строка не найдена" << n;
+		return;
+	}
+	int size = index + str.size();
+	cout << n << "Байт начала строки : " << index << n;
+	cout << n << "Байт конца строки : " << size << n;
+	file.close();
+}
 void menu(){
 	cout << n << "Использование : \n \n./programm file-name чтение(-rd)/добавление(-a)/перезапись(-rw)/";
-	cout << "\n  копирование(-cp)/произвольная вставка(-p)/стереть(-e)"
+	cout << "\n  копирование(-cp)/произвольная вставка(-p)/стереть(-e)/поиск строки(-f)"
 	<< n << n;
 }
 int main(int argc,char *argv[]){
@@ -81,7 +91,7 @@ int main(int argc,char *argv[]){
 		menu();
 		return 1;
 	}
-	if(strcmp(argv[2],"-rd") && strcmp(argv[2],"-a") && strcmp(argv[2],"-rw") && strcmp(argv[2],"-cp") && strcmp(argv[2],"-p") && strcmp(argv[2],"-e")){
+	if(strcmp(argv[2],"-rd") && strcmp(argv[2],"-a") && strcmp(argv[2],"-rw") && strcmp(argv[2],"-cp") && strcmp(argv[2],"-p") && strcmp(argv[2],"-e") && strcmp(argv[2],"-f")){
 		menu();
 		return 1;
 	}
@@ -136,7 +146,7 @@ int main(int argc,char *argv[]){
 			return 1;
 		}
 		if(!strcmp(argv[1],argv[3])){
-			cout << "Неверный ввод" << n;
+			system("echo \"\e[31mНеверный ввод\e[0m\"");
 			return 1;
 		}
 		copy(file,argv[3]);
@@ -152,9 +162,22 @@ int main(int argc,char *argv[]){
 	if(!strcmp(argv[2],"-e")){
 		if(argc != 5){
 			cout << "Использование функции стереть(-e) : " << n
-			<< "./programm file-name -p байт-от байт-до" << n;
+			<< "./programm file-name -e байт-начало байт-количество" << n;
 			return 1;
 		}
 		erase(atoi(argv[3]),atoi(argv[4]),argv[1]);
+	}
+	if(!strcmp(argv[2],"-f")){
+		if(argc != 4){
+			cout << "Использование функции поиск строки(-f) : " << n
+			<< "./programm file-name -f ваша_строка" << n;
+			return 1;
+		}
+		fstream file(argv[1],ios::in);
+		if(!file){
+			cout << "Не удалось открыть файл '" << argv[1] << "'" << n;
+			return 1;
+		}
+		search(argv[3],file);
 	}
 }
