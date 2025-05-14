@@ -31,12 +31,12 @@ void read(fstream &f){
 	cout << n << n << "Размер файла : " << size << " байт" << n ;
 	f.close();
 }
-void write(char* s,fstream &f){
+void write(string s,fstream &f){
 	int i = 0;
 	while(s[i]) f.put(s[i++]);
 	f.close();
 }
-void copy(fstream &f,char* fname){
+void copy(fstream &f,string fname){
 	fstream file(fname,ios::out | ios::trunc);
 	char ch;
 	while(f.get(ch)) file.put(ch);
@@ -56,7 +56,7 @@ void paste(int byte,string str,string file){
 	w<<temp;
 	w.close();
 }
-void erase(int start,int count,char* fname){
+void erase(int start,int count,string fname){
 	fstream f(fname,ios::in);
 	if(start>0) start--;
 	string temp;
@@ -72,7 +72,7 @@ void search(string str,fstream &file){
 	char ch;
 	while(file.get(ch)) temp += ch;
 	int index = temp.find(str);
-	if(index == string::npos){
+	if(index == -1){
 		cout << n << "Строка не найдена" << n;
 		return;
 	}
