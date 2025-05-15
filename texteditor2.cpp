@@ -224,7 +224,6 @@ int main(int argc,char *argv[]){
 			<< "./programm file-name -e байт-начало байт-количество" << n;
 			return 1;
 		}
-		erase(atoi(argv[3]),atoi(argv[4]),argv[1]);
 		try{
 			erase(atoi(argv[3]),atoi(argv[4]),argv[1]);
 		}catch(runtime_error& err){
