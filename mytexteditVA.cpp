@@ -3,6 +3,7 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
+#include <vector>
 using namespace std;
 ostream &n(ostream &stream){
 	stream << "\n";
@@ -28,7 +29,7 @@ void read(fstream &f){
 		cout << ch;
 		size++;
 	}
-	cout << n << n << "Размер файла : " << size << " байт" << n ;
+	cout << n << n << "Размер файла: " << size << " байт" << n ;
 	f.close();
 }
 void write(string s,fstream &f){
@@ -50,7 +51,12 @@ void paste(int byte,string str,string file){
 	string temp;
 	char ch;
 	while(r.get(ch)) temp += ch;
-	temp.insert(byte,str);
+	try{
+		temp.insert(byte,str);
+	}catch(out_of_range& err){
+		cerr << "Выход за границы файла! \n";
+		exit(1);
+	}
 	r.close();
 	w.open(file,ios::out | ios::trunc);
 	w<<temp;
@@ -58,11 +64,15 @@ void paste(int byte,string str,string file){
 }
 void erase(int start,int count,string fname){
 	fstream f(fname,ios::in);
-	if(start>0) start--;
 	string temp;
 	char ch;
 	while(f.get(ch)) temp += ch;
-	temp.erase(start,count);
+	try{
+		temp.erase(start,count);
+	}catch(out_of_range& err){
+		cerr << "Выход за границы файла!\n";
+		exit(1);
+	}
 	f.close();
 	f.open(fname,ios::out | ios::trunc);
 	f << temp;
@@ -77,8 +87,8 @@ void search(string str,fstream &file){
 		return;
 	}
 	int size = index + str.size();
-	cout << n << "Байт начала строки : " << index << n;
-	cout << n << "Байт конца строки : " << size << n;
+	cout << n << "Байт начала строки: " << index << n;
+	cout << n << "Байт конца строки: " << size << n;
 	file.close();
 }
 void menu(){
@@ -86,98 +96,141 @@ void menu(){
 	cout << "\n  копирование(-cp)/произвольная вставка(-p)/стереть(-e)/поиск строки(-f)"
 	<< n << n;
 }
-int main(int argc,char *argv[]){
-	if(argc<3){
+int main(int argc,char* argv[]){
+	vector<string> args(argv, argv + argc);
+	if(args.size() < 3 || args[1] == "--help"){
 		menu();
 		return 1;
 	}
-	if(strcmp(argv[2],"-rd") && strcmp(argv[2],"-a") && strcmp(argv[2],"-rw") && strcmp(argv[2],"-cp") && strcmp(argv[2],"-p") && strcmp(argv[2],"-e") && strcmp(argv[2],"-f")){
-		menu();
-		return 1;
-	}
-	if(!strcmp(argv[2],"-rd")){
-		if(argc>3){
-			cout << "Использование функции чтение(-rd) : " << n
-			<< "./programm file-name -rd" << n;
-			return 1;
-		}
-		fstream file(argv[1],ios::in);
+	if(args[2] == "-rd"){
+		fstream file(args[1],ios::in);
 		if(!file){
-			cout << "Не удалось открыть файл '" << argv[1] << "'" << n;
+			cerr << "Не удалось открыть файл \'" << args[1] << "\'" << n;
 			return 1;
 		}
 		read(file);
+		return 0;
 	}
-	if(!strcmp(argv[2],"-a")){
-		if(argc<4){
-			cout << "Использование функции добавление(-a) : " << n
-			<< "./programm file-name -a ваша_строка" << n;
-			return 1;
+	if(args[2] == "-a"){
+		if(args.size() < 4){
+			string str;
+			cout << "Введите текст: " << n;
+			getline(cin,str);
+			args.push_back(str);
 		}
-		fstream file(argv[1],ios::out | ios::app);
+		fstream file(args[1],ios::out | ios::app);
 		if(!file){
-			cout << "Не удалось открыть файл '" << argv[1] << "'" << n;
+			cerr << "Не удалось открыть файл \'" << args[1] << "\'" << n;
 			return 1;
 		}
-		write(argv[3],file);
+		write(args[3],file);
+		return 0;
 	}
-	if(!strcmp(argv[2],"-rw")){
-		if(argc<4){
-			cout << "Использование функции перезапись(-rw) : " << n
-			<< "./programm file-name -rw ваша_строка" << n;
-			return 1;
+	if(args[2] == "-rw"){
+		if(args.size() < 4){
+			string str;
+			cout << "Введите текст: " << n;
+			getline(cin,str);
+			args.push_back(str);
 		}
-		fstream file(argv[1],ios::out | ios::trunc);
+		fstream file(args[1],ios::out | ios::trunc);
 		if(!file){
-			cout << "Не удалось открыть файл '" << argv[1] << "'" << n;
+			cerr << "Не удалось открыть файл \'" << args[1] << "\'" << n;
 			return 1;
 		}
-		write(argv[3],file);
+		write(args[3],file);
+		return 0;
 	}
-	if(!strcmp(argv[2],"-cp")){
-		if(argc<4){
-			cout << "Использование функции копирование(-cp) : " << n
-			<< "./programm file-name -cp to-file-name" << n;
+	if(args[2] == "-cp"){
+		if(args.size() < 4){
+			string str;
+			cout << "Введите имя файла: " << n;
+			getline(cin,str);
+			args.push_back(str);
+		}
+		if(args[1] == args[3]){
+			cerr << "Такое копирование запрещено" << n;
 			return 1;
 		}
-		fstream file(argv[1],ios::in);
+		fstream file(args[1],ios::in);
 		if(!file){
-			cout << "Не удалось открыть файл '" << argv[1] << "'" << n;
+			cerr << "Не удалось открыть файл \'" << args[1] << "\'" << n;
 			return 1;
 		}
-		if(!strcmp(argv[1],argv[3])){
-			system("echo \"\e[31mНеверный ввод\e[0m\"");
-			return 1;
-		}
-		copy(file,argv[3]);
+		copy(file,args[3]);
 	}
-	if(!strcmp(argv[2],"-p")){
-		if(argc<5){
-			cout << "Использование функции произвольная вставка(-p) : " << n
-			<< "./programm file-name -p байт ваша_строка" << n;
+	if(args[2] == "-p"){
+		if(args.size() <= 4){
+			if(args.size() == 4) args.pop_back();
+			string byte;
+			string str;
+			cout << "Введите байт: " << n;
+			cin >> byte;
+			args.push_back(byte);
+			cout << "Введите текст: " << n;
+			cin >> str;
+			args.push_back(str);
+		}
+		int byte;
+		try{
+			byte = stoi(args[3]);
+		} catch (const std::invalid_argument& err) {
+			cerr << "Некорректный числовой аргумент: " + args[3] << n;
+			return 1;
+		} catch (const std::out_of_range& err) {
+			cerr << "Число вне диапазона: " + args[3] << n;
 			return 1;
 		}
-		paste(atoi(argv[3]),argv[4],argv[1]);
+		paste(byte,args[4],args[1]);
+		return 0;
 	}
-	if(!strcmp(argv[2],"-e")){
-		if(argc != 5){
-			cout << "Использование функции стереть(-e) : " << n
-			<< "./programm file-name -e байт-начало байт-количество" << n;
+	if(args[2] == "-e"){
+		if(args.size() <= 3){
+			string bt;
+			string cnt;
+			cout << "Введите начальный байт: " << n;
+			cin >> bt;
+			args.push_back(string(bt));
+			cout << "Введите количество байт: " << n;
+			cin >> cnt;
+			args.push_back(string(cnt));
+		}
+		int start;
+		int count;
+		try{
+			start = stoi(args[3]);
+		} catch (invalid_argument& err) {
+			cerr << "Некорректный числовой аргумент: " << args[3] << n;
+			return 1;
+		} catch (out_of_range& err) {
+			cerr << "Число вне диапазона: " << args[3] << n;
 			return 1;
 		}
-		erase(atoi(argv[3]),atoi(argv[4]),argv[1]);
+		try{
+			count = stoi(args[4]);
+		} catch (invalid_argument& err) {
+			cerr << "Некорректный числовой аргумент: " << args[4] << n;
+			return 1;
+		} catch (out_of_range& err) {
+			cerr << "Число вне диапазона: " << args[4] << n;
+			return 1;
+		}
+		erase(start,count,args[1]);
+		return 0;
 	}
-	if(!strcmp(argv[2],"-f")){
-		if(argc != 4){
-			cout << "Использование функции поиск строки(-f) : " << n
-			<< "./programm file-name -f ваша_строка" << n;
-			return 1;
+	if(args[2] == "-f"){
+		if(args.size() < 4){
+			string str;
+			cout << "Введите текст: " << n;
+			cin >> str;
+			args.push_back(str);
 		}
-		fstream file(argv[1],ios::in);
+		fstream file(args[1],ios::in);
 		if(!file){
-			cout << "Не удалось открыть файл '" << argv[1] << "'" << n;
+			cerr << "Не удалось открыть файл \'" << args[1] << "\'" << n;
 			return 1;
 		}
-		search(argv[3],file);
+		search(args[3],file);
+		return 0;
 	}
 }
